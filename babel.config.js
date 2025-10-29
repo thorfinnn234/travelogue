@@ -1,11 +1,10 @@
-module.exports = function (api) {
+module.exports = function(api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: ["babel-preset-expo"],
     plugins: [
-      'expo-router/babel',
-      ['module-resolver', { alias: { '@': './' } }], // 👈 adds "@/..."
-      'react-native-reanimated/plugin',
+      ["module-resolver", { alias: { "@": "./app" } }],
+      "react-native-reanimated/plugin",
     ],
   };
 };
