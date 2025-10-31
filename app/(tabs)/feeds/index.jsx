@@ -36,67 +36,69 @@ const REAL_NAMES = [
 ];
 
 // curated high-quality travel images mapped by region / theme
-const TRAVEL_IMAGES = {
-  paris: "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=1080&q=80",
-  tokyo: "https://images.unsplash.com/photo-1557401623-c0e436d2dc1b?auto=format&fit=crop&w=1080&q=80",
-  santorini: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1080&q=80",
-  bali: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1080&q=80",
-  lagos: "https://images.unsplash.com/photo-1593879814899-cb8bbee0b4e0?auto=format&fit=crop&w=1080&q=80",
-  capetown: "https://images.unsplash.com/photo-1535914254981-b5012eebbd15?auto=format&fit=crop&w=1080&q=80",
-  newyork: "https://images.unsplash.com/photo-1486308510493-aa64833634ef?auto=format&fit=crop&w=1080&q=80",
-  marrakesh: "https://images.unsplash.com/photo-1581888227599-c0c97f2f88aa?auto=format&fit=crop&w=1080&q=80",
-  iceland: "https://images.unsplash.com/photo-1526401281623-359ad3b94a30?auto=format&fit=crop&w=1080&q=80",
-  rome: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=1080&q=80",
-  dubai: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1080&q=80",
-  sydney: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d5?auto=format&fit=crop&w=1080&q=80",
-  hawaii: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1080&q=80",
-  maldives: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1080&q=80",
-  alps: "https://images.unsplash.com/photo-1500048993953-d23a436266cf?auto=format&fit=crop&w=1080&q=80",
-  nature: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1080&q=80",
-};
+// const TRAVEL_IMAGES = {
+//   paris:     "https://unsplash.com/photos/colosseum-arena-photography-VFRTXGw1VjU",
+//   tokyo:     "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?q=80&w=1600&auto=format&fit=crop",
+//   santorini: "https://images.unsplash.com/photo-1505739772971-8d3030a6e8c7?q=80&w=1600&auto=format&fit=crop",
+//   bali:      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1600&auto=format&fit=crop",
+//   lagos:     "https://images.unsplash.com/photo-1593879814899-cb8bbee0b4e0?q=80&w=1600&auto=format&fit=crop",
+//   capetown:  "https://images.unsplash.com/photo-1600047509807-ba4f7fc7edaa?q=80&w=1600&auto=format&fit=crop",
+//   newyork:   "https://images.unsplash.com/photo-1528892952291-009c663ce843?q=80&w=1600&auto=format&fit=crop",
+//   marrakesh: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=1600&auto=format&fit=crop",
+//   iceland:   "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=1600&auto=format&fit=crop",
+//   rome:      "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1600&auto=format&fit=crop",
+//   dubai:     "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=1600&auto=format&fit=crop",
+//   sydney:    "https://images.unsplash.com/photo-1510749342490-cc296c6df763?q=80&w=1600&auto=format&fit=crop",
+//   maldives:  "https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?q=80&w=1600&auto=format&fit=crop",
+//   alps:      "https://images.unsplash.com/photo-1500048993953-d23a436266cf?q=80&w=1600&auto=format&fit=crop",
+//   nature:    "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop",
+// };
 
-export const placeToUnsplash = (place = "", seed = 1) => {
-  const key = (place || "").toLowerCase();
 
-  if (/paris|france|eiffel/.test(key)) return TRAVEL_IMAGES.paris;
-  if (/tokyo|japan/.test(key)) return TRAVEL_IMAGES.tokyo;
-  if (/santorini|greece/.test(key)) return TRAVEL_IMAGES.santorini;
-  if (/bali|indonesia/.test(key)) return TRAVEL_IMAGES.bali;
-  if (/lagos|nigeria/.test(key)) return TRAVEL_IMAGES.lagos;
-  if (/cape town|south africa/.test(key)) return TRAVEL_IMAGES.capetown;
-  if (/new york|nyc|usa/.test(key)) return TRAVEL_IMAGES.newyork;
-  if (/marrakesh|morocco/.test(key)) return TRAVEL_IMAGES.marrakesh;
-  if (/iceland|reykjav|aurora/.test(key)) return TRAVEL_IMAGES.iceland;
-  if (/rome|italy/.test(key)) return TRAVEL_IMAGES.rome;
-  if (/dubai|uae|burj/.test(key)) return TRAVEL_IMAGES.dubai;
-  if (/sydney|australia/.test(key)) return TRAVEL_IMAGES.sydney;
-  if (/hawaii/.test(key)) return TRAVEL_IMAGES.hawaii;
-  if (/maldives/.test(key)) return TRAVEL_IMAGES.maldives;
-  if (/mountain|alps|peak/.test(key)) return TRAVEL_IMAGES.alps;
-  if (/nature|forest|park|trail/.test(key)) return TRAVEL_IMAGES.nature;
+// export const placeToUnsplash = (place = "", seed = 1) => {
+//   const key = (place || "").toLowerCase();
 
-  const randomImages = Object.values(TRAVEL_IMAGES);
-  return randomImages[seed % randomImages.length];
-};
+//   if (/paris|france|eiffel/.test(key)) return TRAVEL_IMAGES.paris;
+//   if (/tokyo|japan/.test(key)) return TRAVEL_IMAGES.tokyo;
+//   if (/santorini|greece/.test(key)) return TRAVEL_IMAGES.santorini;
+//   if (/bali|indonesia/.test(key)) return TRAVEL_IMAGES.bali;
+//   if (/maldives|male|atoll/.test(key)) return TRAVEL_IMAGES.maldives;
+//   if (/lagos|nigeria/.test(key)) return TRAVEL_IMAGES.lagos;
+//   if (/cape town|south africa/.test(key)) return TRAVEL_IMAGES.capetown;
+//   if (/new york|nyc|usa/.test(key)) return TRAVEL_IMAGES.newyork;
+//   if (/marrakesh|marrakech|morocco/.test(key)) return TRAVEL_IMAGES.marrakesh;
+//   if (/iceland|reykjav/.test(key)) return TRAVEL_IMAGES.iceland;
+//   if (/rome|italy/.test(key)) return TRAVEL_IMAGES.rome;
+//   if (/dubai|uae|burj/.test(key)) return TRAVEL_IMAGES.dubai;
+//   if (/sydney|australia/.test(key)) return TRAVEL_IMAGES.sydney;
+//   if (/mountain|alps|peak/.test(key)) return TRAVEL_IMAGES.alps;
+//   if (/nature|forest|park|trail|waterfall/.test(key)) return TRAVEL_IMAGES.nature;
 
-const captionFor = (place = "") => {
-  const p = (place || "").toLowerCase();
-  if (/paris/.test(p)) return "Golden hour by the Eiffel—Paris never disappoints.";
-  if (/tokyo/.test(p)) return "Neon nights and ramen stops—Tokyo energy!";
-  if (/santorini/.test(p)) return "White walls, blue domes, and salty air.";
-  if (/bali|beach|island/.test(p)) return "Palm breeze + turquoise water = perfect day.";
-  if (/lagos/.test(p)) return "Sunset drives on the Eko Atlantic coastline.";
-  if (/cape town/.test(p)) return "Hiked Table Mountain—worth every step.";
-  if (/new york|nyc/.test(p)) return "Skyline views and subway stories.";
-  if (/marrakesh/.test(p)) return "Markets, mint tea, and magical alleys.";
-  if (/reykjav|iceland/.test(p)) return "Chasing waterfalls and northern lights.";
-  if (/sydney/.test(p)) return "Opera House mornings, harbour nights.";
-  if (/rome/.test(p)) return "History on every corner—ciao, pasta!";
-  if (/dubai/.test(p)) return "Desert sands and skyscraper dreams.";
-  if (/mountain|alps|peak/.test(p)) return "Thin air and big views—peak bliss.";
-  if (/nature|forest|park|reef/.test(p)) return "Green trails and quiet rivers.";
-  return "New city, fresh stories, and friendly faces.";
-};
+//   const randomImages = Object.values(TRAVEL_IMAGES);
+//   return randomImages[seed % randomImages.length];
+// };
+
+
+// const captionFor = (place = "") => {
+//   const p = (place || "").toLowerCase();
+//   if (/maldives|atoll/.test(p)) return "Overwater villas, clear lagoons—Maldives magic.";
+//   if (/paris/.test(p)) return "Golden hour by the Eiffel—Paris never disappoints.";
+//   if (/tokyo/.test(p)) return "Neon nights and ramen stops—Tokyo energy!";
+//   if (/santorini/.test(p)) return "White walls, blue domes, and salty air.";
+//   if (/bali|beach|island/.test(p)) return "Palm breeze + turquoise water = perfect day.";
+//   if (/lagos/.test(p)) return "Sunset drives on the Eko Atlantic coastline.";
+//   if (/cape town/.test(p)) return "Hiked Table Mountain—worth every step.";
+//   if (/new york|nyc/.test(p)) return "Skyline views and subway stories.";
+//   if (/marrakesh/.test(p)) return "Markets, mint tea, and magical alleys.";
+//   if (/reykjav|iceland/.test(p)) return "Chasing waterfalls and northern lights.";
+//   if (/sydney/.test(p)) return "Opera House mornings, harbour nights.";
+//   if (/rome/.test(p)) return "History on every corner—ciao, pasta!";
+//   if (/dubai/.test(p)) return "Desert sands and skyscraper dreams.";
+//   if (/mountain|alps|peak/.test(p)) return "Thin air and big views—peak bliss.";
+//   if (/nature|forest|park|reef/.test(p)) return "Green trails and quiet rivers.";
+//   return "New city, fresh stories, and friendly faces.";
+// };
+
 
 const formatTimeAgo = (iso) => {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -177,6 +179,55 @@ export default function FeedScreen() {
 
   const onToggleLike = useCallback((id) => toggleLikeStore(id), [toggleLikeStore]);
   const handlePhotoError = useCallback((id) => setPhotoFallback(id), [setPhotoFallback]);
+    // Map simple place keywords to representative Unsplash images. Kept small and defensive
+    // so the feed can always show a fallback if a post lacks an image.
+    const placeToUnsplash = (place = "", seed = 1) => {
+      const key = (place || "").toLowerCase();
+      if (/paris|france|eiffel/.test(key)) return "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1400&auto=format&fit=crop";
+      if (/tokyo|japan/.test(key)) return "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?q=80&w=1400&auto=format&fit=crop";
+      if (/santorini|greece/.test(key)) return "https://images.unsplash.com/photo-1505739772971-8d3030a6e8c7?q=80&w=1400&auto=format&fit=crop";
+      if (/bali|indonesia/.test(key)) return "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1400&auto=format&fit=crop";
+      if (/maldives|atoll/.test(key)) return "https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?q=80&w=1400&auto=format&fit=crop";
+      if (/lagos|nigeria/.test(key)) return "https://images.unsplash.com/photo-1593879814899-cb8bbee0b4e0?q=80&w=1400&auto=format&fit=crop";
+      if (/cape town|south africa/.test(key)) return "https://images.unsplash.com/photo-1600047509807-ba4f7fc7edaa?q=80&w=1400&auto=format&fit=crop";
+      if (/new york|nyc|usa/.test(key)) return "https://images.unsplash.com/photo-1528892952291-009c663ce843?q=80&w=1400&auto=format&fit=crop";
+      if (/marrakesh|marrakech|morocco/.test(key)) return "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=1400&auto=format&fit=crop";
+      if (/iceland|reykjav/.test(key)) return "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=1400&auto=format&fit=crop";
+      if (/rome|italy/.test(key)) return "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1400&auto=format&fit=crop";
+      if (/dubai|uae|burj/.test(key)) return "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=1400&auto=format&fit=crop";
+      if (/sydney|australia/.test(key)) return "https://images.unsplash.com/photo-1510749342490-cc296c6df763?q=80&w=1400&auto=format&fit=crop";
+      if (/mountain|alps|peak/.test(key)) return "https://images.unsplash.com/photo-1500048993953-d23a436266cf?q=80&w=1400&auto=format&fit=crop";
+      if (/nature|forest|park|trail|waterfall/.test(key)) return "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1400&auto=format&fit=crop";
+
+      // default fallback (rotate by seed)
+      const fallback = [
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1400&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1500048993953-d23a436266cf?q=80&w=1400&auto=format&fit=crop",
+      ];
+      return fallback[Math.abs(seed) % fallback.length];
+    };
+
+
+    // Small caption helper used by the feed when a post caption is missing or too short.
+    const captionFor = (place = "") => {
+      const p = (place || "").toLowerCase();
+      if (/maldives|atoll/.test(p)) return "Overwater villas, clear lagoons—Maldives magic.";
+      if (/paris/.test(p)) return "Golden hour by the Seine. Paris just hits different.";
+      if (/tokyo/.test(p)) return "Neon nights and ramen stops—Tokyo energy!";
+      if (/santorini/.test(p)) return "White walls, blue domes, and salty air.";
+      if (/bali|beach|island/.test(p)) return "Palm breeze + turquoise water = perfect day.";
+      if (/lagos/.test(p)) return "Sunset drives on the Eko Atlantic coastline.";
+      if (/cape town/.test(p)) return "Hiked Table Mountain—worth every step.";
+      if (/new york|nyc/.test(p)) return "Skyline views and subway stories.";
+      if (/marrakesh/.test(p)) return "Markets, mint tea, and magical alleys.";
+      if (/reykjav|iceland/.test(p)) return "Chasing waterfalls and northern lights.";
+      if (/sydney/.test(p)) return "Opera House mornings, harbour nights.";
+      if (/rome/.test(p)) return "History on every corner—ciao, pasta!";
+      if (/dubai/.test(p)) return "Desert sands and skyscraper dreams.";
+      if (/mountain|alps|peak/.test(p)) return "Thin air and big views—peak bliss.";
+      if (/nature|forest|park|reef/.test(p)) return "Green trails and quiet rivers.";
+      return "New city, fresh stories, and friendly faces.";
+    };
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 600);
@@ -387,6 +438,9 @@ export default function FeedScreen() {
   };
 
   const renderItem = ({ item, index }) => {
+      (() => {
+        try { console.debug('feed:renderItem', { id: item.id, image: item.image, local: item.local }); } catch (e) {}
+      })();
     const p = presentPost(item, index);
 
     return (

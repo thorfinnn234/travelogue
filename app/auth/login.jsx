@@ -10,6 +10,10 @@ import {
   Animated,
   Easing,
   Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -117,6 +121,10 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
+  // input refs for focus chaining
+  const emailRef = useRef(null);
+  const pwdRef = useRef(null);
+
   // dropdown toast
   const { show, ToastView } = useToast();
 
@@ -171,127 +179,150 @@ export default function Login() {
     }
   };
 
-  // estimate a top inset (simple, no SafeArea import)
+  // top inset + keyboard offset (same pattern as Signup)
   const topInset = Platform.select({ android: StatusBar.currentHeight || 0, ios: 0, default: 0 });
+  const keyboardOffset = (topInset || 0) + 56; // ~navbar height
 
   return (
-    <View style={[styles.screen, { backgroundColor: t.bg }]}>
-      <StatusBar barStyle={t.text === "#FFFFFF" ? "light-content" : "dark-content"} />
-
-      {/* Toast dropdown lives at the very top */}
-      <ToastView topInset={topInset} />
-
-      {/* Back nav */}
-      <View style={styles.navbar}>
-        <Pressable
-          onPress={() => {
-            if (router.canGoBack()) router.back();
-            else router.replace("/onboarding");
-          }}
-          hitSlop={10}
-          style={({ pressed }) => [
-            styles.backBtn,
-            { backgroundColor: pressed ? t.subtle : "transparent" },
-          ]}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardOffset}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          contentContainerStyle={{ padding: 18, flexGrow: 1, justifyContent: "center" }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         >
-          <Ionicons name="arrow-back" size={22} color={t.text} />
-        </Pressable>
-        <Text style={[styles.navTitle, { color: t.text }]}>Login</Text>
-        <View style={{ width: 40 }} />
-      </View>
+          <View style={[styles.screen, { backgroundColor: t.bg }]}>
+            <StatusBar barStyle={t.text === "#FFFFFF" ? "light-content" : "dark-content"} />
 
-      {/* Header */}
-      <View style={styles.headerWrap}>
-        <View style={[styles.logo, { backgroundColor: t.subtle, borderColor: t.border }]}>
-          <Ionicons name="airplane-outline" size={24} color={t.primary} />
-        </View>
-        <Text style={[styles.title, { color: t.text }]}>Welcome back</Text>
-        <Text style={[styles.subtitle, { color: t.text + "99" }]}>
-          Sign in to continue your travel stories
-        </Text>
-      </View>
+            {/* Toast dropdown lives at the very top */}
+            <ToastView topInset={topInset} />
 
-      {/* Card */}
-      <View style={[styles.card, { backgroundColor: "#fff", borderColor: t.border }]}>
-        {/* Email */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: t.text }]}>Email</Text>
-          <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
-            <Ionicons name="mail-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="you@mail.com"
-              placeholderTextColor={t.text + "66"}
-              style={[styles.input, { color: t.text }]}
-            />
+            {/* Back nav */}
+            <View style={styles.navbar}>
+              <Pressable
+                onPress={() => {
+                  if (router.canGoBack()) router.back();
+                  else router.replace("/onboarding");
+                }}
+                hitSlop={10}
+                style={({ pressed }) => [
+                  styles.backBtn,
+                  { backgroundColor: pressed ? t.subtle : "transparent" },
+                ]}
+              >
+                <Ionicons name="arrow-back" size={22} color={t.text} />
+              </Pressable>
+              <Text style={[styles.navTitle, { color: t.text }]}>Login</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* Header */}
+            <View style={styles.headerWrap}>
+              <View style={[styles.logo, { backgroundColor: t.subtle, borderColor: t.border }]}>
+                <Ionicons name="airplane-outline" size={24} color={t.primary} />
+              </View>
+              <Text style={[styles.title, { color: t.text }]}>Welcome back</Text>
+              <Text style={[styles.subtitle, { color: t.text + "99" }]}>
+                Sign in to continue your travel stories
+              </Text>
+            </View>
+
+            {/* Card */}
+            <View style={[styles.card, { backgroundColor: "#fff", borderColor: t.border }]}>
+              {/* Email */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Email</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="mail-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    ref={emailRef}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    placeholder="you@mail.com"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="next"
+                    onSubmitEditing={() => pwdRef.current?.focus?.()}
+                    blurOnSubmit={false}
+                  />
+                </View>
+              </View>
+
+              {/* Password */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Password</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    ref={pwdRef}
+                    value={pwd}
+                    onChangeText={setPwd}
+                    secureTextEntry={!showPwd}
+                    placeholder="••••••••"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="go"
+                    onSubmitEditing={submit}
+                  />
+                  <Pressable onPress={() => setShowPwd((s) => !s)} hitSlop={10} style={styles.rightIconBtn}>
+                    <Ionicons name={showPwd ? "eye-off-outline" : "eye-outline"} size={18} color={t.text + "99"} />
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Forgot */}
+              <View style={styles.rowBetween}>
+                <View />
+                <Link href="/auth/forgot" asChild>
+                  <Text style={[styles.forgot, { color: t.primary }]}>Forgot password?</Text>
+                </Link>
+              </View>
+
+              {/* Submit */}
+              <Pressable
+                onPress={submit}
+                disabled={busy}
+                style={({ pressed }) => [
+                  styles.primaryBtn,
+                  { backgroundColor: t.primary, borderColor: t.primary, opacity: pressed || busy ? 0.9 : 1 },
+                ]}
+              >
+                {busy ? (
+                  <ActivityIndicator color={t.onPrimary} />
+                ) : (
+                  <>
+                    <Ionicons name="log-in-outline" size={18} color={t.onPrimary} />
+                    <Text style={[styles.primaryText, { color: t.onPrimary }]}>Continue</Text>
+                  </>
+                )}
+              </Pressable>
+
+              {/* Footer */}
+              <Text style={[styles.footer, { color: t.text + "99" }]}>
+                New here?{" "}
+                <Link href="/auth/signup" asChild>
+                  <Text style={{ color: t.primary, fontWeight: "700" }}>Create account</Text>
+                </Link>
+              </Text>
+            </View>
           </View>
-        </View>
-
-        {/* Password */}
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: t.text }]}>Password</Text>
-          <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
-            <Ionicons name="lock-closed-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
-            <TextInput
-              value={pwd}
-              onChangeText={setPwd}
-              secureTextEntry={!showPwd}
-              placeholder="••••••••"
-              placeholderTextColor={t.text + "66"}
-              style={[styles.input, { color: t.text }]}
-            />
-            <Pressable onPress={() => setShowPwd((s) => !s)} hitSlop={10} style={styles.rightIconBtn}>
-              <Ionicons name={showPwd ? "eye-off-outline" : "eye-outline"} size={18} color={t.text + "99"} />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Forgot */}
-        <View style={styles.rowBetween}>
-          <View />
-          <Link href="/auth/forgot" asChild>
-            <Text style={[styles.forgot, { color: t.primary }]}>Forgot password?</Text>
-          </Link>
-        </View>
-
-        {/* Submit */}
-        <Pressable
-          onPress={submit}
-          disabled={busy}
-          style={({ pressed }) => [
-            styles.primaryBtn,
-            { backgroundColor: t.primary, borderColor: t.primary, opacity: pressed || busy ? 0.9 : 1 },
-          ]}
-        >
-          {busy ? (
-            <ActivityIndicator color={t.onPrimary} />
-          ) : (
-            <>
-              <Ionicons name="log-in-outline" size={18} color={t.onPrimary} />
-              <Text style={[styles.primaryText, { color: t.onPrimary }]}>Continue</Text>
-            </>
-          )}
-        </Pressable>
-
-        {/* Footer */}
-        <Text style={[styles.footer, { color: t.text + "99" }]}>
-          New here?{" "}
-          <Link href="/auth/signup" asChild>
-            <Text style={{ color: t.primary, fontWeight: "700" }}>Create account</Text>
-          </Link>
-        </Text>
-      </View>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 /* ------------------------------ Styles ------------------------------ */
 const R = 16;
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 18, justifyContent: "center" },
+  // padding now comes from ScrollView to play nice with keyboard
+  screen: { flex: 1, justifyContent: "center" },
 
   // Toast
   toastWrap: {

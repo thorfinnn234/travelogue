@@ -10,6 +10,10 @@ import {
   Animated,
   Easing,
   Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,7 +27,7 @@ function useToast() {
     visible: false,
     title: "",
     message: "",
-    type: "info", // "success" | "error" | "warning" | "info"
+    type: "info",
   });
   const timers = useRef({ hide: null });
 
@@ -104,6 +108,8 @@ function useToast() {
 export default function Signup() {
   const t = useTheme();
   const router = useRouter();
+
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
@@ -112,10 +118,17 @@ export default function Signup() {
   const { show, ToastView } = useToast();
   const topInset = Platform.select({ android: StatusBar.currentHeight || 0, ios: 0, default: 0 });
 
+  // Offset to keep content above keyboard (accounts for status bar + navbar height)
+  const keyboardOffset = (topInset || 0) + 56;
+
   const submit = async () => {
     const emailNorm = String(email).trim().toLowerCase();
-    if (!email || !pwd || !confirmPwd)
-      return show("warning", "Missing fields", "Enter email, password, and confirm password.");
+    const uname = String(username).trim();
+
+    if (!uname || !email || !pwd || !confirmPwd)
+      return show("warning", "Missing fields", "Enter username, email, password, and confirm password.");
+    if (uname.length < 3)
+      return show("warning", "Short username", "Username must be at least 3 characters.");
     if (pwd.length < 6)
       return show("warning", "Weak password", "Use at least 6 characters.");
     if (pwd !== confirmPwd)
@@ -131,30 +144,27 @@ export default function Signup() {
         return show("error", "Network error", netErr?.message || "Cannot reach Supabase host");
       }
 
-      const { data, error } = await supabase.auth.signUp({ email: emailNorm, password: pwd });
+      const { data, error } = await supabase.auth.signUp({
+        email: emailNorm,
+        password: pwd,
+        options: { data: { username: uname } },
+      });
       if (error) return show("error", "Sign up failed", error.message || String(error));
 
-      // If project requires email confirmation, session will be null
       if (data && !data.session) {
         show("info", "Check your email", "Account created — please confirm your email.");
-        // (Optional) try sending a magic link automatically for convenience
         try {
           const { error: otpError } = await supabase.auth.signInWithOtp({ email: emailNorm });
-          if (otpError) {
-            show("error", "Magic link failed", otpError.message || String(otpError));
-          } else {
-            show("success", "Magic link sent", "Check your inbox to finish signing in.");
-          }
+          if (otpError) show("error", "Magic link failed", otpError.message || String(otpError));
+          else show("success", "Magic link sent", "Check your inbox to finish signing in.");
         } catch (e) {
           show("error", "Magic link failed", String(e));
         }
-        // Go to login after a short beat
         setTimeout(() => router.replace("/auth/login"), 350);
         return;
       }
 
-      // If email confirmation not required: session exists → proceed
-      show("success", "Account created", "Welcome to Travelogue!");
+      show("success", "Account created", `Welcome, ${uname}!`);
       router.replace("/feeds");
     } catch (err) {
       show("error", "Sign up failed", String(err));
@@ -164,116 +174,169 @@ export default function Signup() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: t.bg }]}>
-      <StatusBar barStyle={t.text === "#FFFFFF" ? "light-content" : "dark-content"} />
-
-      {/* Dropdown toast */}
-      <ToastView topInset={topInset} />
-
-      {/* 🔙 Top navigation bar */}
-      <View className="navbar" style={styles.navbar}>
-        <Pressable
-          onPress={() => {
-            if (router.canGoBack()) router.back();
-            else router.replace("/onboarding");
-          }}
-          hitSlop={10}
-          style={({ pressed }) => [
-            styles.backBtn,
-            { backgroundColor: pressed ? t.subtle : "transparent" },
-          ]}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardOffset}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          contentContainerStyle={{ padding: 18, flexGrow: 1, justifyContent: "center" }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         >
-          <Ionicons name="arrow-back" size={22} color={t.text} />
-        </Pressable>
-        <Text style={[styles.navTitle, { color: t.text }]}>Sign Up</Text>
-        <View style={{ width: 40 }} />
-      </View>
+          <View style={[styles.screen, { backgroundColor: t.bg }]}>
+            <StatusBar barStyle={t.text === "#FFFFFF" ? "light-content" : "dark-content"} />
 
-      {/* Title */}
-      <View style={styles.headerWrap}>
-        <View style={[styles.logo, { backgroundColor: t.subtle, borderColor: t.border }]}>
-          <Ionicons name="sparkles-outline" size={22} color={t.primary} />
-        </View>
-        <Text style={[styles.title, { color: t.text }]}>Create your account</Text>
-        <Text style={[styles.subtitle, { color: t.text + "99" }]}>
-          Join Travelogue and share your journeys
-        </Text>
-      </View>
+            {/* Dropdown toast */}
+            <ToastView topInset={topInset} />
 
-      {/* Card */}
-      <View style={[styles.card, { backgroundColor: "#fff", borderColor: t.border }]}>
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: t.text }]}>Email</Text>
-          <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
-            <Ionicons name="mail-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="you@mail.com"
-              placeholderTextColor={t.text + "66"}
-              style={[styles.input, { color: t.text }]}
-            />
+            {/* 🔙 Top navigation bar */}
+            <View className="navbar" style={styles.navbar}>
+              <Pressable
+                onPress={() => {
+                  if (router.canGoBack()) router.back();
+                  else router.replace("/onboarding");
+                }}
+                hitSlop={10}
+                style={({ pressed }) => [
+                  styles.backBtn,
+                  { backgroundColor: pressed ? t.subtle : "transparent" },
+                ]}
+              >
+                <Ionicons name="arrow-back" size={22} color={t.text} />
+              </Pressable>
+              <Text style={[styles.navTitle, { color: t.text }]}>Sign Up</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* Title */}
+            <View style={styles.headerWrap}>
+              <View style={[styles.logo, { backgroundColor: t.subtle, borderColor: t.border }]}>
+                <Ionicons name="sparkles-outline" size={22} color={t.primary} />
+              </View>
+              <Text style={[styles.title, { color: t.text }]}>Create your account</Text>
+              <Text style={[styles.subtitle, { color: t.text + "99" }]}>
+                Join Travelogue and share your journeys
+              </Text>
+            </View>
+
+            {/* Card */}
+            <View style={[styles.card, { backgroundColor: "#fff", borderColor: t.border }]}>
+              {/* Username */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Username</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="person-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    value={username}
+                    onChangeText={setUsername}
+                    autoCapitalize="none"
+                    placeholder="yourusername"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="next"
+                    onSubmitEditing={() => emailRef?.current?.focus?.()}
+                    blurOnSubmit={false}
+                  />
+                </View>
+              </View>
+
+              {/* Email */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Email</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="mail-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    ref={emailRef}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    placeholder="you@mail.com"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="next"
+                    onSubmitEditing={() => pwdRef?.current?.focus?.()}
+                    blurOnSubmit={false}
+                  />
+                </View>
+              </View>
+
+              {/* Password */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Password</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    ref={pwdRef}
+                    value={pwd}
+                    onChangeText={setPwd}
+                    secureTextEntry
+                    placeholder="••••••••"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="next"
+                    onSubmitEditing={() => confirmRef?.current?.focus?.()}
+                    blurOnSubmit={false}
+                  />
+                </View>
+              </View>
+
+              {/* Confirm Password */}
+              <View style={styles.field}>
+                <Text style={[styles.label, { color: t.text }]}>Confirm Password</Text>
+                <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
+                  <Ionicons name="checkmark-done-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
+                  <TextInput
+                    ref={confirmRef}
+                    value={confirmPwd}
+                    onChangeText={setConfirmPwd}
+                    secureTextEntry
+                    placeholder="Repeat password"
+                    placeholderTextColor={t.text + "66"}
+                    style={[styles.input, { color: t.text }]}
+                    returnKeyType="go"
+                    onSubmitEditing={submit}
+                  />
+                </View>
+              </View>
+
+              {/* Submit */}
+              <Pressable
+                onPress={submit}
+                disabled={busy}
+                style={({ pressed }) => [
+                  styles.primaryBtn,
+                  { backgroundColor: t.primary, borderColor: t.primary, opacity: pressed || busy ? 0.9 : 1 },
+                ]}
+              >
+                {busy ? (
+                  <ActivityIndicator color={t.onPrimary} />
+                ) : (
+                  <>
+                    <Ionicons name="person-add-outline" size={18} color={t.onPrimary} />
+                    <Text style={[styles.primaryText, { color: t.onPrimary }]}>Create and continue</Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
           </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: t.text }]}>Password</Text>
-          <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
-            <Ionicons name="lock-closed-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
-            <TextInput
-              value={pwd}
-              onChangeText={setPwd}
-              secureTextEntry
-              placeholder="••••••••"
-              placeholderTextColor={t.text + "66"}
-              style={[styles.input, { color: t.text }]}
-            />
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={[styles.label, { color: t.text }]}>Confirm Password</Text>
-          <View style={[styles.inputWrap, { borderColor: t.border, backgroundColor: "#fff" }]}>
-            <Ionicons name="checkmark-done-outline" size={18} color={t.text + "99"} style={styles.leftIcon} />
-            <TextInput
-              value={confirmPwd}
-              onChangeText={setConfirmPwd}
-              secureTextEntry
-              placeholder="Repeat password"
-              placeholderTextColor={t.text + "66"}
-              style={[styles.input, { color: t.text }]}
-            />
-          </View>
-        </View>
-
-        <Pressable
-          onPress={submit}
-          disabled={busy}
-          style={({ pressed }) => [
-            styles.primaryBtn,
-            { backgroundColor: t.primary, borderColor: t.primary, opacity: pressed || busy ? 0.9 : 1 },
-          ]}
-        >
-          {busy ? (
-            <ActivityIndicator color={t.onPrimary} />
-          ) : (
-            <>
-              <Ionicons name="person-add-outline" size={18} color={t.onPrimary} />
-              <Text style={[styles.primaryText, { color: t.onPrimary }]}>Create and continue</Text>
-            </>
-          )}
-        </Pressable>
-      </View>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
+
+/* Refs for chaining focus (declare after the component for clarity) */
+const emailRef = React.createRef();
+const pwdRef = React.createRef();
+const confirmRef = React.createRef();
 
 /* ------------------------------ Styles ------------------------------ */
 const R = 16;
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 18, justifyContent: "center" },
+  screen: { flex: 1, justifyContent: "center" }, // padding now handled by ScrollView
 
   // Toast
   toastWrap: {

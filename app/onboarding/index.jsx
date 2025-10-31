@@ -1,16 +1,16 @@
-import React, { useRef, useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Dimensions,
-  Pressable,
-  StatusBar,
-  Image,
-} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useMemo, useRef, useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const { width } = Dimensions.get("window");
 const CARD = 120;
@@ -81,14 +81,28 @@ export default function Onboarding() {
     if (index < Slides.length - 1) {
       ref.current?.scrollToIndex({ index: index + 1, animated: true });
     } else {
-      await AsyncStorage.setItem(K_ONBOARDED, "1");
-      router.replace("/auth/login");
+      try {
+        await AsyncStorage.setItem(K_ONBOARDED, "1");
+        console.debug('[DEBUG] Onboarding complete, flag set');
+        const check = await AsyncStorage.getItem(K_ONBOARDED);
+        console.debug('[DEBUG] Verified flag is set:', check);
+        router.replace("/auth/login");
+      } catch (e) {
+        console.error('[DEBUG] Failed to save onboarding state:', e);
+      }
     }
   };
 
   const skip = async () => {
-    await AsyncStorage.setItem(K_ONBOARDED, "1");
-    router.replace("/auth/login");
+    try {
+      await AsyncStorage.setItem(K_ONBOARDED, "1");
+      console.debug('[DEBUG] Onboarding skipped, flag set');
+      const check = await AsyncStorage.getItem(K_ONBOARDED);
+      console.debug('[DEBUG] Verified flag is set:', check);
+      router.replace("/auth/login");
+    } catch (e) {
+      console.error('[DEBUG] Failed to save onboarding state:', e);
+    }
   };
 
   return (
